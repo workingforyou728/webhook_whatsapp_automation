@@ -6,7 +6,7 @@ const auth = new google.auth.GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
-const SHEET_ID = 'your-google-sheet-id-here'; 
+const SHEET_ID = 'https://docs.google.com/spreadsheets/d/1s3h4iJRGXLd3oNgQOpwsyR5kzvgNPRN_ZHRb_fbqtGE/edit?usp=sharing'; 
 
 async function appendToSheet({ from, message }) {
     const client = await auth.getClient();
@@ -37,7 +37,7 @@ app.use(bodyParser.json());
 
 // Verification endpoint for webhook setup
 app.get("/webhook", (req, res) => {
-    const VERIFY_TOKEN = poenv.passcode // Set this to a secure string
+    const VERIFY_TOKEN = "inspireOne1@098P"// Set this to a secure string
     const mode = req.query["hub.mode"];
     const token = req.query["hub.verify_token"];
     const challenge = req.query["hub.challenge"];
