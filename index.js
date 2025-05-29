@@ -1,12 +1,17 @@
 const { google } = require('googleapis');
 const fs = require('fs');
+const keys = require("./service-account.json"); // path to your JSON file
 
-const auth = new google.auth.GoogleAuth({
-    keyFile: 'credentials.json', 
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-});
+const auth = new google.auth.JWT(
+    keys.client_email,
+    null,
+    keys.private_key,
+    ["https://www.googleapis.com/auth/spreadsheets"]
+);
 
-const SHEET_ID = 'https://docs.google.com/spreadsheets/d/1s3h4iJRGXLd3oNgQOpwsyR5kzvgNPRN_ZHRb_fbqtGE/edit?usp=sharing'; 
+const sheets = google.sheets({ version: "v4", auth });
+
+const SHEET_ID = '1G-R_I4-IJX_tpXDI0uQh320jWvY62dyb3ZGVuSZrZcc'; 
 
 async function appendToSheet({ from, message }) {
     const client = await auth.getClient();
