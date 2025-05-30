@@ -43,14 +43,14 @@ async function appendToSheet({ from, message }) {
     console.log(`Number ${from} already exists. Skipping append.`);
     return;
   }
-
+  const timestamp = new Date().toISOString(); 
   // Step 3: Append only if unique
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Sheet1!A:B",
     valueInputOption: "RAW",
     resource: {
-      values: [[from, message]],
+      values: [[from, message,timestamp]],
     },
     // no auth here either
   });
