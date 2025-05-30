@@ -17,7 +17,23 @@ const SHEET_ID = process.env.SHEET_ID;
 
 // Append function
 async function appendToSheet({ from, message }) {
-  const client = await auth.getClient();
+  // Step 1: Get existing phone numbers in column A (assuming numbers are in column A)
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range: "Sheet1!A:A", // All phone numbers in column A
+    // no auth here, because 'sheets' is already authorized
+  });
+
+  const rows = response.data.values || [];
+  const existingNumbers = rows.map(row => row[0]);
+
+  // Step 2: Check if 'from' already exists
+  if (existingNumbers.includes(from)) {
+    console.log(`Number ${from} already exists. Skipping append.`);
+    return;
+  }
+
+  // Step 3: Append only if unique
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Sheet1!A:B",
@@ -25,22 +41,30 @@ async function appendToSheet({ from, message }) {
     resource: {
       values: [[from, message]],
     },
-    auth: client,
+    // no auth here either
   });
+
+  console.log(`Added number ${from} with message.`);
 }
 
 // Webhook endpoint
 app.post("/webhook", async (req, res) => {
   try {
-    const { from, message } = req.body;
-    if (!from || !message) {
-      return res.status(400).json({ error: "Missing 'from' or 'message'" });
+    const entry = req.body.entry?.[0];
+    const messageObj = entry?.changes?.[0]?.value?.messages?.[0];
+
+    if (!messageObj) {
+      return res.sendStatus(200); // No message to process
     }
+
+    const from = messageObj.from;
+    const message = messageObj.text?.body || '';
+
     await appendToSheet({ from, message });
-    res.status(200).json({ success: true });
+    res.sendStatus(200);
   } catch (err) {
-    console.error("Error appending to sheet:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Webhook error:", err.message);
+    res.sendStatus(500);
   }
 });
 
