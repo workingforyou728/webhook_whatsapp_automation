@@ -23,6 +23,22 @@ const auth = new google.auth.JWT(
   ["https://www.googleapis.com/auth/spreadsheets"]       // scopes
 );
 
+app.get("/webhook", (req, res) => {
+  const verify_token = "inspireOne@123"; // Same one you entered in Meta dashboard
+
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (mode && token && mode === "subscribe" && token === verify_token) {
+    console.log("Webhook verified!");
+    res.status(200).send(challenge);
+  } else {
+    res.sendStatus(403);
+  }
+});
+
+
 const sheets = google.sheets({ version: "v4", auth });
 const SHEET_ID = process.env.SHEET_ID;
 
